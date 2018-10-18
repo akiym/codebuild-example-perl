@@ -1,0 +1,12 @@
+version: 0.2
+phases:
+  install:
+    commands:
+      - nohup /usr/local/bin/dockerd --host=unix:///var/run/docker.sock --host=tcp://0.0.0.0:2375 --storage-driver=overlay >/dev/null 2>&1 &
+      - timeout 15 sh -c "until docker info >/dev/null 2>&1; do echo .; sleep 1; done"
+  pre_build:
+    commands:
+      - docker-compose -f docker-compose.ci.yml build
+  build:
+    commands:
+      - docker-compose -f docker-compose.ci.yml run --rm test-app
